@@ -4,17 +4,47 @@ package org.example;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main
 {
+    private static int count = 0; // shared resource
+
+    public void increment() {
+        count++; // not thread-safe
+    }
+
     public static void main(String[] args)
     {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.print("Hello and welcome!");
+        //set up two threads counting to 1000 each
+        // show sum ( 2000 )
+        // display the race condition ( it will not always be 2000 if i do threading wrong)
+        // save results to cassandra db
+        // send data to promethesu
+        // visualise in grafana
+        Main m  = new Main();
+        // create a thread
+        Runnable counter = () -> {
+            for(int i = 0; i <= 1000; i++)
+            {
+              m.increment();
+            }
+        };
 
-        for(int i = 1; i <= 5; i++)
+        // run method. wont work with "run", you need "start".
+
+        Thread t = new Thread(counter);
+        Thread t2 = new Thread(counter);
+        // this is a race condition issue, it prints 1675, 1954, 2001, etc. it should always print 2000
+        // but since the two threads might at the same time reach i = 10 and increment it to 11 simultaneously one inkrementation gets lost.
+        t.start();
+        t2.start();
+
+        try
         {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+            t.join();
+            t2.join();
         }
+        catch(InterruptedException e)
+        {
+        }
+        System.out.println("Count: " + count);
     }
+
 }
