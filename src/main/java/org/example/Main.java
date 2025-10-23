@@ -1,5 +1,10 @@
 package org.example;
 
+import com.sun.net.httpserver.HttpServer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main
@@ -10,8 +15,13 @@ public class Main
         count++; // not thread-safe
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
+        HttpServer server  = HttpServer.create(new InetSocketAddress(8080), 0);
+        server.createContext("/hi", new Controller());
+        server.setExecutor(null);
+        server.start();
+        System.out.println("Server started on http://localhost:8080/hi");
         //set up two threads counting to 1000 each
         // show sum ( 2000 )
         // display the race condition ( it will not always be 2000 if i do threading wrong)
